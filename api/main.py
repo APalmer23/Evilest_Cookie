@@ -1,6 +1,7 @@
 from flask import Flask, request
 import psycopg
 import os
+import random
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,12 +12,21 @@ app = Flask(__name__)
 
 @app.route("/api/get_shape")
 def get_shape():
-    sharpness: float = float(request.args.get("sharpness", -1.0))
-    curviness: float = float(request.args.get("curviness", -1.0))
-    confusion: float = float(request.args.get("confusion", -1.0))
-    precision: float = float(request.args.get("precision", -1.0))
+    # sharpness: float = float(request.args.get("sharpness", -1.0))
+    # curviness: float = float(request.args.get("curviness", -1.0))
+    # confusion: float = float(request.args.get("confusion", -1.0))
+    # precision: float = float(request.args.get("precision", -1.0))
+    with psycopg.connect(conn_str) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM Shapes WHERE id = %s",
+                (random.randint(0, 99), "")
+            )
+            results = cur.fetchone()
 
-    return {"shape": None, "shape_id": -1}, 200
+            if results:
+                return {"shape": results[0], "shape_id": results[1]}, 200
+    return {"error": "Invalid request"}, 400
 
 
 @app.route("/api/submit", methods=["POST"])
@@ -40,6 +50,7 @@ def submit():
                 """, (data["shape_id"])
             )
             shape_data = cur.fetchone()
+
             score = (data["accuracy"] * (shape_data[0] + shape_data[1]) / data["time"])
 
             cur.execute(
