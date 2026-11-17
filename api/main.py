@@ -1,4 +1,10 @@
 from flask import Flask, request
+import psycopg
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+conn_str = os.environ["DATABASE_URL"]
 
 app = Flask(__name__)
 
@@ -43,4 +49,14 @@ def has_user():
     ):
         return {"error": "Incomplete request"}, 400
 
-    return {}, 200
+    with psycopg.connect(conn_str) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM RoundRecord WHERE username = %s;",
+                (data["name"])
+            )
+            # If username doesn't exist, cur.fetchone() will return None
+            if (cur.fetchone()):
+                return {"result": True}, 200
+            else:
+                return {"result": False}, 200
