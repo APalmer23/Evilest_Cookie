@@ -16,7 +16,7 @@ def get_shape():
     confusion: float = float(request.args.get("confusion", -1.0))
     precision: float = float(request.args.get("precision", -1.0))
 
-    return ""
+    return {"shape": None, "shape_id": -1}, 200
 
 
 @app.route("/api/submit", methods=["POST"])
@@ -28,8 +28,33 @@ def submit():
         or "name" not in data
         or "accuracy" not in data
         or "time" not in data
+        or "shape_id"
     ):
         return {"error": "Incomplete request"}, 400
+
+    with psycopg.connect(conn_str) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT confusion, precision FROM Shapes WHERE id = %s
+                """, (data["shape_id"])
+            )
+            shape_data = cur.fetchone()
+            score = (data["accuracy"] * (shape_data[0] + shape_data[1]) / data["time"])
+
+            cur.execute(
+                """
+                INSERT INTO RoundRecord
+                (shape_id, accuracy, username, time, score)
+                VALUES (%f, %f, %f, %f, %f)
+                """, (
+                    data["shape_id"],
+                    data["accuracy"],
+                    data["name"],
+                    data["time"],
+                    score
+                )
+            )
 
     return {"message": "Score submitted"}, 201
 
@@ -72,3 +97,7 @@ def has_user():
                 return {"result": True}, 200
             else:
                 return {"result": False}, 200
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=5000)
