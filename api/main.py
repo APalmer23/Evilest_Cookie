@@ -36,6 +36,18 @@ def submit():
 
 @app.route("/api/leaderboard")
 def leaderboard():
+    with psycopg.connect(conn_str) as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT DISTINCT ON(id) username, score
+                FROM RoundRecord
+                ORDER BY score DESC
+                LIMIT 10
+                """
+            )
+            results = cur.fetchall()
+            return {"result": results}, 200
     return {}, 200
 
 
