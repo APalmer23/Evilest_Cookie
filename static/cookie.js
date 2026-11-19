@@ -92,3 +92,53 @@ function getTime() {
 //function getTime() {
 //  document.getElementById("TIMETEXT").textContent = String(randTime);
 //}
+
+//start of website code
+let current_name = "";
+
+
+document.getElementById("loadBtn").addEventListener("click", async () => {
+ const table = document.getElementById("myTable");
+
+
+ try {
+   const response = await fetch("http://192.168.110.146:5000/api/leaderboard");
+   const data = await response.json();
+  
+   data.forEach(datapoint => {
+     // Create a new row (<tr>)
+     const row = document.createElement("tr");
+
+
+     // Loop through object values to create cells (<td>)
+     Object.values(datapoint).forEach(text => {
+         const cell = document.createElement("td");
+         cell.textContent = text; // Safely assign text content
+         row.appendChild(cell);   // Add cell to the row
+     });
+
+
+     // Append the completed row to the table body
+     tableBody.appendChild(row);
+   });
+ } catch (err) {
+   document.getElementById("output").textContent = "Error: " + err.message;
+ }
+});
+
+
+
+const form = document.getElementById('contactForm');
+form.addEventListener('submit', (event) => {
+   const API_URL = 'YOUR ENDPOINT HERE';
+   event.preventDefault();
+   const formData = new FormData(form);
+   const name = formData.get("name");
+  
+   current_name = name;
+   document.getElementById('logged_in').innerText = current_name;
+});
+//End of set up for website
+
+
+
