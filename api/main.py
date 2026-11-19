@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 import psycopg
 import os
 import random
@@ -9,6 +9,10 @@ conn_str = os.environ["DATABASE_URL"]
 
 app = Flask(__name__)
 
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/api/get_shape")
 def get_shape():
