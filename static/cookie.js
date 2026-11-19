@@ -7,6 +7,7 @@
 
 
 //ACTUAL GAME
+//Get html elements and set up canvas context
 const canvas = document.getElementById("CANVAS");
 const ctx = canvas.getContext("2d");
 const doneButton = document.getElementById("DONEBUTTON");
@@ -30,18 +31,18 @@ document.getElementById("PLAYBUTTON").addEventListener("click", async () => {
 
 
 //Start cutting and start timer (10 min)
-canvas.addEventListener("mousedown", async () => {
-  if (hasCut) {
+canvas.addEventListener("mousedown", async (e) => {
+  if (!hasCut) {
     isCutting = true;
     lastX = e.offsetX;
     lastY = e.offsetY;  
-    const timeoutID = setTimeout(() => { console.log("Timer Started!"); }, 600000);
+    //const timeoutID = setTimeout(() => { console.log("Timer Started!"); }, 600000);
   }
 })
 
 
 //As mouse moves, record shift and render a stroke for that movement
-canvas.addEventListener("mousemoving", async () => {
+canvas.addEventListener("mousemove", async (e) => {
   if (!isCutting) return;
   ctx.beginPath();
   ctx.moveTo(lastX, lastY);
@@ -60,10 +61,34 @@ canvas.addEventListener("mouseleave", async () => {
 
 
 //When mouse released, end cutting, prevent cutting this cookie again, and end timer
-canvas.addEventListener("mouseup", async() => {
+canvas.addEventListener("mouseup", async () => {
   isCutting = false;
   hasCut = true;
 })
 
 
 //save cursor movements to bitmap
+doneButton.addEventListener("click", async () => {
+  if (hasCut) {
+    hasCut = false;
+  }
+})
+
+const randAccuracy = Number((Math.random() * 100).toFixed(2));
+const randTime = Number((Math.random() * 60).toFixed(2));
+//CALL THESE TO GET GAME DATA
+function getAccuracy() {
+  return randAccuracy;
+}
+
+function getTime() {
+  return randTime;
+}
+
+//TRY THESE IF THE OTHER RETURN FUNCTIONS DON'T WORK
+//function getAccuracy() {
+//  document.getElementById("ACCURACYTEXT").textContent = String(randAccuracy);
+//}
+//function getTime() {
+//  document.getElementById("TIMETEXT").textContent = String(randTime);
+//}
